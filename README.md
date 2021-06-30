@@ -1,4 +1,4 @@
-# bot_xadrez# chess-bot
+# bot_xadrez
  ## passos:
  * cirar um tabuleiro com pecas que possam ser movidas;
  * verificar se a movimentacao das pecas foram feitas dentros das regras;
