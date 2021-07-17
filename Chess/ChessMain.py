@@ -34,6 +34,8 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    moveMade = False #flag variable for when a move is made
     loadImage()
     running = True
     sqSelected = ()
@@ -42,6 +44,7 @@ def main():
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            #mouse handles
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()
                 col = location[0]//SQ_SIZE
@@ -54,9 +57,22 @@ def main():
                     playerClicks.append(sqSelected)
                 if len(playerClicks) == 2:
                     move = ChessEngine.Move(playerClicks[0],playerClicks[1],gs.board)
-                    gs.makeMove(move)
+                    print(playerClicks)
+                    #verifica se o movimento que quer ser realizado e valido
+                    if move in validMoves:
+                        gs.makeMove(move)
+                        moveMade = True
                     sqSelected = ()
                     playerClicks = []
+            #keyboard engine
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z: #undo when 'z ins pressed
+                    gs.undoMove()
+                    moveMade = True
+        #obtem novamente os movimentos validos e atualiza novamente a flag( para poupar processamento)
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False
 
         drawGameState(screen,gs)
         clock.tick(MAX_FPS)
@@ -77,7 +93,7 @@ def drawPieces(screen, board):
     for row in range(DIMENSIONS):
         for colum in range(DIMENSIONS):
             piece = board[row][colum]
-            if piece != "-":
+            if piece != ".":
                 screen.blit(IMAGE[piece],p.Rect(colum*SQ_SIZE,row*SQ_SIZE,SQ_SIZE,SQ_SIZE))
 
 
