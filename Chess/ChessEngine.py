@@ -9,13 +9,14 @@ class GameState():
         #each character represent one piece
         self.board = [
             ["r","n","b","q","k","b","n","r"],
-            ["p","p","p","P","p","p","p","p"],
+            ["p","p","p","p","p","p","p","p"],
             [".",".",".",".",".",".",".","."],
             [".",".",".",".",".",".",".","."],
             [".",".",".",".",".",".",".","."],
             [".",".",".",".",".",".",".","."],
-            ["P","P","P","P","p","P","P","P"],
-            ["R","N","B","Q","K","B","N","R"]]
+            ["P","P","P","P","P","P","P","P"],
+            ["R","N","B","Q","K","B","N","R"]
+            ]
         self.moveFunctions = {'p': self.getPawnMoves, 'r': self.getRookMove, 'n': self.getKnightMove,
                               'b': self.getBishipMove, 'q': self.getQueenMove, 'k': self.getKingMove }
         self.whiteToMove = True
@@ -80,46 +81,99 @@ class GameState():
                     moves.append(Move((r,c),(r-1,c+1),self.board))
 
         if not self.whiteToMove:#black pawn
-            if self.board[r+1][c] == '.':
-                moves.append(Move(( r, c),(r+1, c), self.board))
-                if r==1 and self.board[r+2][c] == '.':
-                    moves.append(Move((r, c), (r+2,c), self.board))
-            if c-1>=0:
-                if self.board[r+1][c-1].isupper():
-                    moves.append(Move((r,c),(r+1,c-1),self.board))
-            if c+1<=7:
-                if self.board[r+1][c+1].isupper():
-                    moves.append(Move((r,c),(r+1,c+1),self.board))
+            if r != 7: #FIXME: tentar retirar isso apos adicionar promocao de peao, imagino q nao sera necessario
+                if self.board[r+1][c] == '.':
+                    moves.append(Move(( r, c),(r+1, c), self.board))
+                    if r==1 and self.board[r+2][c] == '.':
+                        moves.append(Move((r, c), (r+2,c), self.board))
+                if c-1>=0:
+                    if self.board[r+1][c-1].isupper():
+                        moves.append(Move((r,c),(r+1,c-1),self.board))
+                if c+1<=7:
+                    if self.board[r+1][c+1].isupper():
+                        moves.append(Move((r,c),(r+1,c+1),self.board))
 
     '''
     Get all the Rook moves for the Rook located at row, col and add to the move list
     '''
     def getRookMove(self, r, c, moves):
-        pass
+        directions = ((-1,0),(0,-1),(1,0),(0,1))
+        for d in directions:
+            for i in range(1,8):
+                endRow =r+d[0]*i
+                endCol =c+d[1]*i
+                if 0 <= endRow < 8 and 0<= endCol <8: #verifica se esta no tabuleiro
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == '.': #verifica se e uma casa sem peca
+                        moves.append(Move((r,c),(endRow,endCol),self.board))
+                    elif (endPiece.islower() and self.whiteToMove) or (endPiece.isupper() and not self.whiteToMove): #verifica se e possivel realizar uma captura
+                        moves.append(Move((r,c),(endRow,endCol),self.board))
+                        break
+                    else: #peca amiga ou invalido
+                        break
+                else:#fora do tabuleiro
+                    break
 
     '''
     Get all the Knight moves for the Knight located at row, col and add to the move list
     '''
     def getKnightMove(self, r, c, moves):
-        pass
+        knigtMoves = ((-2,-1),(-2,1),(2,-1),(2,1),(-1,-2),(-1,2),(1,-2),(1,2))
+        for m in knigtMoves:
+            endRow =r+m[0]
+            endCol =c+m[1]
+            if 0 <= endRow < 8 and 0<= endCol <8: #verifica se esta no tabuleiro
+                endPiece = self.board[endRow][endCol]
+                if endPiece == '.': #verifica se e uma casa sem peca
+                    moves.append(Move((r,c),(endRow,endCol),self.board))
+                elif (endPiece.islower() and self.whiteToMove) or (endPiece.isupper() and not self.whiteToMove): #verifica se e possivel realizar uma captura
+                    moves.append(Move((r,c),(endRow,endCol),self.board))
+                    print("captura")
 
     '''
     Get all the Biship moves for the Biship located at row, col and add to the move list
     '''
     def getBishipMove(self, r, c, moves):
-        pass
+        directions = ((-1,-1),(-1,1),(1,1),(1,-1))
+        for d in directions:
+            for i in range(1,8):
+                endRow =r+d[0]*i
+                endCol =c+d[1]*i
+                if 0 <= endRow < 8 and 0<= endCol <8: #verifica se esta no tabuleiro
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == '.': #verifica se e uma casa sem peca
+                        moves.append(Move((r,c),(endRow,endCol),self.board))
+                    elif (endPiece.islower() and self.whiteToMove) or (endPiece.isupper() and not self.whiteToMove): #verifica se e possivel realizar uma captura
+                        moves.append(Move((r,c),(endRow,endCol),self.board))
+                        break
+                    else: #peca amiga ou invalido
+                        break
+                else:#fora do tabuleiro
+                    break
 
     '''
     Get all the Queen moves for the Queen located at row, col and add to the move list
     '''
     def getQueenMove(self, r, c, moves):
-        pass
+        self.getBishipMove(r,c,moves)
+        self.getRookMove(r,c,moves)
 
     '''
     Get all the King moves for the King located at row, col and add to the move list
     '''
     def getKingMove(self, r, c, moves):
-        pass
+        directions = ((-1,0),(0,-1),(1,0),(0,1),(-1,-1),(-1,1),(1,1),(1,-1))
+        for i in range(8):
+            endRow =r+directions[i][0]
+            endCol =c+directions[i][1]
+            if 0 <= endRow < 8 and 0<= endCol <8: #verifica se esta no tabuleiro
+                endPiece = self.board[endRow][endCol]
+                if endPiece == '.': #verifica se e uma casa sem peca
+                    moves.append(Move((r,c),(endRow,endCol),self.board))
+                elif (endPiece.islower() and self.whiteToMove) or (endPiece.isupper() and not self.whiteToMove): #verifica se e possivel realizar uma captura
+                    moves.append(Move((r,c),(endRow,endCol),self.board))
+
+
 
 
 class Move():
